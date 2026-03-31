@@ -1,0 +1,5 @@
+{
+  "name": "Remix: WOP Navigator App",
+  "description": "Calculates bearing and range of a fixing mark at various distances before the Wheel Over Point (WOP) using the cosine formula.",
+  "requestFramePermissions": []
+}
