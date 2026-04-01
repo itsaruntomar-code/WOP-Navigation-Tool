@@ -20,13 +20,40 @@ export default function App() {
   const [finalRange, setFinalRange] = useState('');
   const [legLength, setLegLength] = useState('');
   const [results, setResults] = useState<CalculationRow[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!markName.trim()) newErrors.markName = 'Mark name is required';
+    
+    const cVal = parseFloat(course);
+    if (isNaN(cVal)) newErrors.course = 'Enter a valid course (0-360)';
+    else if (cVal < 0 || cVal >= 360) newErrors.course = 'Course should be 0-359.9';
+
+    const fbVal = parseFloat(finalBearing);
+    if (isNaN(fbVal)) newErrors.finalBearing = 'Enter a valid bearing (0-360)';
+    else if (fbVal < 0 || fbVal >= 360) newErrors.finalBearing = 'Bearing should be 0-359.9';
+
+    const frVal = parseFloat(finalRange);
+    if (isNaN(frVal)) newErrors.finalRange = 'Enter a valid range';
+    else if (frVal <= 0) newErrors.finalRange = 'Range must be positive';
+
+    const llVal = parseFloat(legLength);
+    if (isNaN(llVal)) newErrors.legLength = 'Enter a valid length';
+    else if (llVal <= 0) newErrors.legLength = 'Length must be positive';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleGenerate = () => {
+    if (!validate()) return;
+
     const rows: CalculationRow[] = [];
-    const cVal = parseFloat(course) || 0;
-    const fbVal = parseFloat(finalBearing) || 0;
-    const frVal = parseFloat(finalRange) || 0;
-    const llVal = Math.max(0, parseInt(legLength) || 0);
+    const cVal = parseFloat(course);
+    const fbVal = parseFloat(finalBearing);
+    const frVal = parseFloat(finalRange);
+    const llVal = parseFloat(legLength);
 
     const cRad = (cVal * Math.PI) / 180;
     const fbRad = (fbVal * Math.PI) / 180;
@@ -127,13 +154,25 @@ export default function App() {
   };
 
   const handleSave = () => {
+    if (!validate()) {
+      alert('Please fix the errors before saving.');
+      return;
+    }
     localStorage.setItem('wop_last_data', JSON.stringify({
       markName, course, finalBearing, finalRange, legLength
     }));
     alert('Data saved successfully!');
   };
 
-  const inputClasses = "w-full border-2 border-gray-400 rounded-lg p-2 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors placeholder:text-gray-900/50";
+  const inputClasses = (fieldName: string) => {
+    const hasError = !!errors[fieldName];
+    return `w-full border-2 ${hasError ? 'border-red-400 bg-red-50' : 'border-gray-400'} rounded-lg p-2 text-base text-gray-900 focus:outline-none ${hasError ? 'focus:border-red-500' : 'focus:border-blue-500'} transition-colors placeholder:text-gray-900/50`;
+  };
+
+  const ErrorMessage = ({ fieldName }: { fieldName: string }) => {
+    if (!errors[fieldName]) return null;
+    return <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors[fieldName]}</p>;
+  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center p-4 md:p-6 font-sans">
@@ -175,11 +214,15 @@ export default function App() {
               <input 
                 type="text"
                 value={markName}
-                onChange={(e) => setMarkName(e.target.value)}
+                onChange={(e) => {
+                  setMarkName(e.target.value);
+                  if (errors.markName) setErrors(prev => ({ ...prev, markName: '' }));
+                }}
                 onFocus={(e) => e.target.select()}
                 placeholder="Eg., Nanwell Pt."
-                className={inputClasses}
+                className={inputClasses('markName')}
               />
+              <ErrorMessage fieldName="markName" />
             </div>
             
             <div className="space-y-1">
@@ -187,11 +230,15 @@ export default function App() {
               <input 
                 type="text"
                 value={course}
-                onChange={(e) => setCourse(e.target.value)}
+                onChange={(e) => {
+                  setCourse(e.target.value);
+                  if (errors.course) setErrors(prev => ({ ...prev, course: '' }));
+                }}
                 onFocus={(e) => e.target.select()}
                 placeholder="Eg., 185°"
-                className={inputClasses}
+                className={inputClasses('course')}
               />
+              <ErrorMessage fieldName="course" />
             </div>
 
             <div className="space-y-1">
@@ -199,11 +246,15 @@ export default function App() {
               <input 
                 type="text"
                 value={finalBearing}
-                onChange={(e) => setFinalBearing(e.target.value)}
+                onChange={(e) => {
+                  setFinalBearing(e.target.value);
+                  if (errors.finalBearing) setErrors(prev => ({ ...prev, finalBearing: '' }));
+                }}
                 onFocus={(e) => e.target.select()}
                 placeholder="Eg., 270°"
-                className={inputClasses}
+                className={inputClasses('finalBearing')}
               />
+              <ErrorMessage fieldName="finalBearing" />
             </div>
 
             <div className="space-y-1">
@@ -211,11 +262,15 @@ export default function App() {
               <input 
                 type="text"
                 value={finalRange}
-                onChange={(e) => setFinalRange(e.target.value)}
+                onChange={(e) => {
+                  setFinalRange(e.target.value);
+                  if (errors.finalRange) setErrors(prev => ({ ...prev, finalRange: '' }));
+                }}
                 onFocus={(e) => e.target.select()}
                 placeholder="Eg., 12.5 Cable"
-                className={inputClasses}
+                className={inputClasses('finalRange')}
               />
+              <ErrorMessage fieldName="finalRange" />
             </div>
 
             <div className="space-y-1">
@@ -223,11 +278,15 @@ export default function App() {
               <input 
                 type="text"
                 value={legLength}
-                onChange={(e) => setLegLength(e.target.value)}
+                onChange={(e) => {
+                  setLegLength(e.target.value);
+                  if (errors.legLength) setErrors(prev => ({ ...prev, legLength: '' }));
+                }}
                 onFocus={(e) => e.target.select()}
                 placeholder="Eg., 20 C"
-                className={inputClasses}
+                className={inputClasses('legLength')}
               />
+              <ErrorMessage fieldName="legLength" />
             </div>
           </div>
 
