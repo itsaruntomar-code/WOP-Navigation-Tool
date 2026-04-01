@@ -323,7 +323,7 @@ export default function App() {
           </div>
           <div className="text-center">
             <h1 className="text-white text-xl md:text-2xl font-bold tracking-wide">WOP NAVIGATOR APP</h1>
-            <p className="text-white/90 text-[10px] mt-0.5">by Arun Tomar</p>
+            <p className="text-white/90 text-[10px] mt-0.5">Developed by Asst Comdt Arun Tomar</p>
           </div>
         </div>
 
